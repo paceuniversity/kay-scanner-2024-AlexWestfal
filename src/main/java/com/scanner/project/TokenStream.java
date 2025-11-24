@@ -57,8 +57,21 @@ public class TokenStream {
                 }
                 if (!isEof) nextChar = readChar();
                 skipWhiteSpace();
+            } else if (nextChar == '*') { // Handle block comments
+                nextChar = readChar();
+                while (!isEof) {
+                    if (nextChar == '*') {
+                        nextChar = readChar();
+                        if (nextChar == '/') {
+                            nextChar = readChar();
+                            break;
+                        }
+                    } else {
+                        nextChar = readChar();
+                    }
+                }
+                skipWhiteSpace();
             } else {
-                // A slash followed by anything else must be an operator.
                 t.setValue("/");
                 t.setType("Operator");
                 return t;
@@ -71,6 +84,7 @@ public class TokenStream {
             t.setType("Operator");
             t.setValue(t.getValue() + nextChar);
             switch (nextChar) {
+
             case '<':
                 nextChar = readChar();
                 if (nextChar == '=') {
@@ -78,6 +92,7 @@ public class TokenStream {
                     nextChar = readChar();
                 }
                 return t;
+
             case '>':
                 nextChar = readChar();
                 if (nextChar == '=') {
@@ -85,6 +100,7 @@ public class TokenStream {
                     nextChar = readChar();
                 }
                 return t;
+
             case '=':
                 nextChar = readChar();
                 if (nextChar == '=') {
@@ -94,6 +110,7 @@ public class TokenStream {
                     t.setType("Other");
                 }
                 return t;
+
             case ':':
                 nextChar = readChar();
                 if (nextChar == '=') {
@@ -104,6 +121,7 @@ public class TokenStream {
                     t.setType("Other");
                 }
                 return t;
+
             case '!':
                 nextChar = readChar();
                 if (nextChar == '=') {
@@ -111,6 +129,7 @@ public class TokenStream {
                     nextChar = readChar();
                 }
                 return t;
+
             case '|':
                 nextChar = readChar();
                 if (nextChar == '|') {
@@ -121,6 +140,7 @@ public class TokenStream {
                     t.setType("Other");
                 }
                 return t;
+
             case '&':
                 nextChar = readChar();
                 if (nextChar == '&') {
@@ -131,7 +151,8 @@ public class TokenStream {
                     t.setType("Other");
                 }
                 return t;
-            default: // all other operators
+
+            default:
                 nextChar = readChar();
                 return t;
             }
@@ -162,7 +183,7 @@ public class TokenStream {
             }
         }
 
-        if (isDigit(nextChar)) { // check for integer literals
+        if (isDigit(nextChar)) {
             t.setType("Literal");
             while (isDigit(nextChar)) {
                 t.setValue(t.getValue() + nextChar);
@@ -185,7 +206,6 @@ public class TokenStream {
             nextChar = readChar();
         }
 
-        // Finally check for whitespaces and bypass them
         skipWhiteSpace();
 
         return t;
